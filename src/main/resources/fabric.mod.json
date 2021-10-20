@@ -19,12 +19,10 @@
   "environment": "server",
   "entrypoints": {
     "server": [
-      "br.com.brforgers.mods.disfabric.DisFabric"
+      "com.irunatbullets.mods.disfabric.DisFabric"
     ]
   },
-  "mixins": [
-    "disfabric.mixins.json"
-  ],
+  "mixins": [],
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",

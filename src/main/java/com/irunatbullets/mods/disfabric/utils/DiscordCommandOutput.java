@@ -1,6 +1,6 @@
-package br.com.brforgers.mods.disfabric.utils;
+package com.irunatbullets.mods.disfabric.utils;
 
-import br.com.brforgers.mods.disfabric.DisFabric;
+import com.irunatbullets.mods.disfabric.DisFabric;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.text.Text;
 
