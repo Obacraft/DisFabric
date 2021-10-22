@@ -2,6 +2,7 @@ package com.irunatbullets.mods.disfabric.listeners;
 
 import com.irunatbullets.mods.disfabric.DisFabric;
 import com.irunatbullets.mods.disfabric.utils.DiscordCommandOutput;
+
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,10 +16,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+
 
 public class DiscordEventListener extends ListenerAdapter {
 
@@ -31,6 +36,22 @@ public class DiscordEventListener extends ListenerAdapter {
 
             } else if(e.getMessage().getContentRaw().startsWith("!whitelist")) {
                 String command = e.getMessage().getContentRaw().replace("!whitelist ", "whitelist add ");
+                String minecraftUsername = e.getMessage().getContentRaw().replace("!whitelist ", "");
+
+                String discordID = "<@" + e.getAuthor().getId() + ">";
+                StringBuilder whitelisting = new StringBuilder("```\n!whitelist " + minecraftUsername + " " + discordID + "\n```");
+
+                try {
+                    URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + minecraftUsername);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        e.getChannel().sendMessage(whitelisting.toString()).queue();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
                 server.getCommandManager().execute(getDiscordCommandSource(e), command);
 
             } else if (e.getMessage().getContentRaw().startsWith("!spawn")) {
@@ -58,22 +79,27 @@ public class DiscordEventListener extends ListenerAdapter {
                 String help = """
                         ```
                         =============== Commands ===============
-
+                        
+                        To whitelist yourself on this server use:
+                        !whitelist <minecraft username>
+                        
                         !online: list server online players
                         !tps: shows loaded dimensions tps´s
+                        !spawn: shows the location of spawn
                         !console <command>: executes commands in the server console (admins only)
                         ```""";
                 e.getChannel().sendMessage(help).queue();
 
             }
         }
-
     }
 
     public ServerCommandSource getDiscordCommandSource(@NotNull MessageReceivedEvent e){
         ServerWorld serverWorld = Objects.requireNonNull(getServer()).getOverworld();
+
         User author = e.getAuthor();
         String username = author.getName() + '#' + author.getDiscriminator();
+
         return new ServerCommandSource(new DiscordCommandOutput(), serverWorld == null ? Vec3d.ZERO : Vec3d.of(serverWorld.getSpawnPos()), Vec2f.ZERO, serverWorld, 4, username, new LiteralText(username), getServer(), null);
     }
 
